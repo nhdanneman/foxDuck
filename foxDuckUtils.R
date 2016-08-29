@@ -5,12 +5,9 @@
 ## Created: August 24, 2016
 ## Last Edited: August 28, 2016
 
-install.packages("NISTunits", dependencies = TRUE)
 require(NISTunits)
 require(plotrix)
 
-NISTdegTOradian(45)
-NISTradianTOdeg(pi/2)
 
 # duck: 
 # given an xy and previous direction, pick a new direction and move a units
@@ -19,8 +16,6 @@ NISTradianTOdeg(pi/2)
 # given duck's current xy, move b units around the circle towards that angle
 
 # assume circle is radius R and centered at 0,0
-
-quickDist <- function(x1,y1,x2,y2){sqrt( (x2-x1)^2 + (y2-y1)^2 ) }
 
 # generates a sequence of anges within +/- degDelta degrees of previous angle (in Deg)
 newDuck <- function(N, degDelta){
@@ -83,8 +78,9 @@ duckPath <- function(duckAngles, stepSize, R){
 
 duckVersusFox <- function(aDuckPath, foxDegStart, stepSizeDegree, R, plotBoolean){
   if(plotBoolean){
-    plot(0,0,xlim=c(-R*1.1, R*1.1), ylim=c(-R*1.1, R*1.1), type="n")
+    plot(0,0,xlim=c(-R*1.2, R*1.2), ylim=c(-R*1.2, R*1.2), type="n")
     draw.circle(0,0,10)
+    points(0,0,pch=19)
   }
   out <- list()
   out$duckMadeShore <- FALSE
@@ -92,16 +88,18 @@ duckVersusFox <- function(aDuckPath, foxDegStart, stepSizeDegree, R, plotBoolean
   out$duckEscaped <- FALSE
   out$foxLocation <- c(0,0)
   out$finalIter <- 0
-  foxTheta <- rep(0, length(aDuckPath))
+  foxTheta <- rep(0, nrow(aDuckPath))
   foxTheta[1] <- foxDegStart
   for(i in 2:nrow(aDuckPath)){
     # move fox:
     foxTheta[i] <- foxUpdate(foxTheta[i-1], aDuckPath[i,1], aDuckPath[i,2], stepSizeDegree)
     if(plotBoolean){
-      text(aDuckPath[i,1], aDuckPath[i,2], i)
-      x <- cos(NISTdegTOradian(foxTheta[i]))*R
-      y <- sin(NISTdegTOradian(foxTheta[i]))*R
-      text(x,y, col="red", i)
+      #text(aDuckPath[i,1], aDuckPath[i,2], i)
+      points(aDuckPath[i,1], aDuckPath[i,2], cex=0.45)
+      x <- cos(NISTdegTOradian(foxTheta[i]))*R*1.2* (1-(i*0.001))
+      y <- sin(NISTdegTOradian(foxTheta[i]))*R*1.2* (1-(i*0.001))
+      #text(x,y, col="red", i)
+      points(x,y, col="red", cex=0.45)
     }      
     # check to see if duck has reached shore
     if(aDuckPath[i,1]^2 + aDuckPath[i,2]^2 >= R^2){
@@ -126,10 +124,34 @@ duckVersusFox <- function(aDuckPath, foxDegStart, stepSizeDegree, R, plotBoolean
 }
 
 # duckpath(duckAngles(n, degDelta), stepSize, R) 
-dp <- duckPath(newDuck(20, 50), 3, 10)
-dp
-#duckVersusFox(dp, foxStartDeg, degStepSize, Plot)
-duckVersusFox(dp, 90, 15, 10, TRUE)  
+dp <- duckPath(newDuck(1000, 50), .3, 10)
+#duckVersusFox(dp, foxStartDeg, degStepSize, Radius, Plot)
+out <- duckVersusFox(dp, 90, 2, 10, TRUE)  
+out$duckMadeShore
+out$duckEscaped
+
+
+duckBiology <- function(parentDuck, maxNDeltas, minDelta, maxDelta, generation, currDuckID){
+  newDuck <- list()
+  newDuck$id <- currDuckID
+  newDuck$genBorn <- generation
+  newDuck$parents <- c(parentDuck$parents, parentDuck$id)
+  newDuck$angles <- parentDuck$angles
+  nDeltas <- sample(1:maxNDeltas, 1)
+  indexOfDeltas <- sample(1:(numAngles-1), nDeltas, replace=F)
+  deltas <- runif(nDeltas, minDelta, maxDelta)
+  for(i in 1:length(deltas)){
+    newDuck$angles[indexOfDeltas[i]:numAngles] <- newDuck$angles[indexOfDeltas[i]:numAngles] + deltas[i]
+    newDuck$angles[newDuck$angles > 360] <- newDuck$angles[newDuck$angles > 360] - 360
+    newDuck$angles[newDuck$angles < 0] <- newDuck$angles[newDuck$angles < 0] + 360
+  }
+  newDuck
+}
+
+
+
+
+
 
 
 
