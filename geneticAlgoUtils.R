@@ -28,14 +28,14 @@ source("/Users/Nathan/ndgit/foxDuck/foxDuckUtils.R")
 ## initialize
 
 # Duck population
-duckPop <- 1000
+duckPop <- 500
 # Where to store any duck that reproduced:
 forebearsStorage <- list()
 forebearsIDVector <- 0
 # generation counter
 generation <- 0
 # how many mutations
-maxNDeltas <- 50
+maxNDeltas <- 25
 # min and max of deltas:
 minDelta <- -25; maxDelta <- 25
 # first duckID
@@ -62,6 +62,7 @@ for(i in 1:duckPop){
   currentDucks[[i]]$angles <- newDuck(numAngles,degDelta)
   currentDucks[[i]]$genBorn <- generation
   currentDucks[[i]]$parents <- 0
+  currentDucks[[i]]$duckFoxAngleDiff <- 0
 }
 
 
@@ -70,16 +71,21 @@ for(g in 1:60){
   generation <- generation + 1  
 
   # Compete every duck against the fox, tracking which ones survive
+  angleAhead <-NULL
   survBool <- NULL
   for(i in 1:length(currentDucks)){
     out <- duckVersusFox(duckPath(currentDucks[[i]]$angles, duckStepSize, R), 
                          foxStartingPosition, foxSpeed, R, FALSE)
     survBool <- c(survBool, out$duckEscaped)
+    angleAhead <- c(angleAhead, out$duckFoxAngleDiff)
   }
+  
   
   
   # which ones survived
   survIndex <- which(survBool == TRUE)
+  # only keep lead information for survivors
+  angleAhead <- angleAhead[survBool==TRUE]
   
   if(length(survIndex) == 0){
     print("ALL THE DUCKS ARE DEAD!!!")
@@ -106,9 +112,9 @@ for(g in 1:60){
   while(length(currentDucks) < duckPop){  # until we have enough ducks...
     # increment current duck ID
     currDuckID <- currDuckID + 1
-    # pick a duck from surviving ducks:
+    # pick a duck from surviving ducks on the basis of how much it beat the fox by
     # add to list of forebears if not already there
-    toRepro <- sample(1:length(survivingDucks), size=1)
+    toRepro <- sample(1:length(survivingDucks), size=1, prob=angleAhead)
     if(!survivingDucks[[toRepro]]$id %in% forebearsIDVector){
       forebearsStorage[[length(forebearsStorage) + 1]] <- survivingDucks[[toRepro]]
       forebearsIDVector <- c(forebearsIDVector, survivingDucks[[toRepro]]$id)
@@ -121,7 +127,7 @@ for(g in 1:60){
   }
   
   # increase fox speed in proportion to number of ducks that survived:
-  foxSpeedIncrease <-  (1.0 * length(which(survBool==TRUE))/duckPop) / generation 
+  foxSpeedIncrease <-  (2.0 * length(which(survBool==TRUE))/duckPop) / generation 
   
   # Print out some info:
   print("")

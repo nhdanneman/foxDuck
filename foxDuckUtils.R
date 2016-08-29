@@ -85,6 +85,7 @@ duckVersusFox <- function(aDuckPath, foxDegStart, stepSizeDegree, R, plotBoolean
   out <- list()
   out$duckMadeShore <- FALSE
   out$duckAngleDeg <- 0
+  out$duckFoxAngleDiff <- 0
   out$duckEscaped <- FALSE
   out$foxLocation <- c(0,0)
   out$finalIter <- 0
@@ -107,10 +108,16 @@ duckVersusFox <- function(aDuckPath, foxDegStart, stepSizeDegree, R, plotBoolean
       out$foxLocation <- foxTheta[i]
       # check to see if the duck escaped, or was caught
       # if angle to duck's final (onshore) position is smaller than .5 degrees, fox caught it
-      
       duckAngleDeg <- NISTradianTOdeg(atan2(aDuckPath[i,2], aDuckPath[i,1]))
       if(duckAngleDeg < 0){duckAngleDeg <- duckAngleDeg + 360}  
-      out$duckAngleDeg <- duckAngleDeg
+      out$duckAngleDeg <- duckAngleDeg      
+      # save the angle between the duck and fox:
+      if(abs(duckAngleDeg-foxTheta[i]) < 180){
+        out$duckFoxAngleDiff <- abs(duckAngleDeg-foxTheta[i])
+      } else {
+        out$duckFoxAngleDiff <- abs(abs(duckAngleDeg-foxTheta[i]) -360)
+      }
+      # see if duck was caught or not
       if(abs(foxTheta[i]-duckAngleDeg) < 0.5 | abs(foxTheta[i]-duckAngleDeg)> 359.5 ){
         out$duckEscaped <- FALSE
       } else { out$duckEscaped <- TRUE}
