@@ -75,11 +75,12 @@ duckPath <- function(duckAngles, stepSize, R){
 # returns a boolean duckMadeShore
 # returns a boolean duckEscaped
 # returns a set of fox responses (thetas in degrees)
+# R is the pond radius
 
 duckVersusFox <- function(aDuckPath, foxDegStart, stepSizeDegree, R, plotBoolean){
   if(plotBoolean){
     plot(0,0,xlim=c(-R*1.2, R*1.2), ylim=c(-R*1.2, R*1.2), type="n")
-    draw.circle(0,0,10)
+    draw.circle(0,0,R)
     points(0,0,pch=19)
   }
   out <- list()

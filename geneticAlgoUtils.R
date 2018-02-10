@@ -4,7 +4,7 @@
 ## Created: August 28, 2016
 ## Last Edited: August 28, 2016
 
-source("/Users/Nathan/ndgit/foxDuck/foxDuckUtils.R")
+source("/Users/ndanneman/Documents/personal/gits/foxDuck/foxDuckUtils.R")
 
 # How many ducks should be in play at any given time??
    # Hard cap at 1k ducks; randomly select which ones to reproduce
@@ -35,7 +35,7 @@ forebearsIDVector <- 0
 # generation counter
 generation <- 0
 # how many mutations
-maxNDeltas <- 25
+maxNDeltas <- 40
 # min and max of deltas:
 minDelta <- -25; maxDelta <- 25
 # first duckID
@@ -66,7 +66,7 @@ for(i in 1:duckPop){
 }
 
 
-for(g in 1:60){
+for(g in 1:80){
   # increment generation
   generation <- generation + 1  
 
@@ -80,8 +80,7 @@ for(g in 1:60){
     angleAhead <- c(angleAhead, out$duckFoxAngleDiff)
   }
   
-  
-  
+
   # which ones survived
   survIndex <- which(survBool == TRUE)
   # only keep lead information for survivors
@@ -97,6 +96,11 @@ for(g in 1:60){
   duckVersusFox(duckPath(currentDucks[[toPlot]]$angles, duckStepSize, R), 
                 foxStartingPosition, foxSpeed, R, TRUE)
   text(-9, 11.5, paste("Generation: ", generation, sep=""))
+  # plot circle of safety
+  # radius at which duck's rpm = fox'x rpm
+  #r_cs <- duckStepSize / (foxSpeed * 2 * 360 * pi)
+  r_cs <- (360*duckStepSize) / (foxSpeed*2*pi)
+  draw.circle(0,0,r_cs, border="blue")
   
   
   # put surviving ducks in a different container, called 'survivingDucks'
